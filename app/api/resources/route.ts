@@ -33,19 +33,56 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Geoapify API key not configured" }, { status: 500 })
     }
 
-    // Step 1: Geocode using Geoapify
-    const geocodeResponse = await fetch(
-      `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&limit=1&apiKey=${GEOAPIFY_API_KEY}`
-    )
+    // Step 1: Geocode using Geoapify with smart location detection
+    // For ambiguous inputs (like zip codes), get multiple results and pick the best one
+    const isLikelyZipCode = /^\d{4,6}$/.test(location.trim())
+    const limitResults = isLikelyZipCode ? 3 : 1 // Get multiple results for zip codes
+    
+    let geocodeResponse
+    try {
+      geocodeResponse = await fetch(
+        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&limit=${limitResults}&bias=countrycode:us&apiKey=${GEOAPIFY_API_KEY}`,
+        { signal: AbortSignal.timeout(10000) } // 10 second timeout
+      )
+    } catch (fetchError) {
+      console.error('Geocoding fetch error:', fetchError)
+      return NextResponse.json({ error: "Geocoding request timed out. Please try again." }, { status: 500 })
+    }
+
+    if (!geocodeResponse.ok) {
+      console.error('Geocoding API error:', geocodeResponse.status)
+      return NextResponse.json({ error: "Could not geocode location. Please try again." }, { status: 500 })
+    }
 
     const geocodeData = await geocodeResponse.json()
+    console.log('Geocode results:', JSON.stringify(geocodeData.features?.slice(0, 3).map((f: any) => ({
+      name: f.properties.formatted,
+      country: f.properties.country_code
+    }))))
 
     if (!geocodeData.features || geocodeData.features.length === 0) {
       return NextResponse.json({ error: "Could not find that location. Please try again." }, { status: 400 })
     }
+    
+    // For zip codes, prioritize US locations
+    let selectedFeature = geocodeData.features[0]
+    
+    if (isLikelyZipCode && geocodeData.features.length > 1) {
+      // First check if there's a US match
+      const usMatch = geocodeData.features.find((f: any) => 
+        f.properties.country_code?.toLowerCase() === 'us' || 
+        f.properties.country?.toLowerCase() === 'united states'
+      )
+      if (usMatch) {
+        selectedFeature = usMatch
+        console.log('Selected US match:', selectedFeature.properties.formatted)
+      }
+    }
 
-    const [lng, lat] = geocodeData.features[0].geometry.coordinates
-    const locationName = geocodeData.features[0].properties.formatted
+    const [lng, lat] = selectedFeature.geometry.coordinates
+    const locationName = selectedFeature.properties.formatted
+    
+    console.log(`Selected location: ${locationName} (${lat}, ${lng})`)
 
     // Convert miles to meters for Geoapify
     const radiusMeters = Math.round(radius * 1609.34)

@@ -1,53 +1,53 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { MapPin, Loader2, Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
-import Image from "next/image"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MapPin, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 export default function LandingPage() {
-  const router = useRouter()
-  const { theme, setTheme } = useTheme()
-  const [location, setLocation] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const router = useRouter();
+  const [location, setLocation] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!location.trim()) {
-      setError("Please enter a location")
-      return
+      setError("Please enter a location");
+      return;
     }
 
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
 
     try {
       // Encode location and redirect to results page
-      const encodedLocation = encodeURIComponent(location)
-      router.push(`/results?location=${encodedLocation}`)
+      const encodedLocation = encodeURIComponent(location);
+      router.push(`/results?location=${encodedLocation}`);
     } catch (err) {
-      setError("An error occurred. Please try again.")
-      setLoading(false)
+      setError("An error occurred. Please try again.");
+      setLoading(false);
     }
-  }
+  };
 
   const handleUseLocation = async () => {
-    setLoading(true)
-    setError("")
+    setLoading(true);
+    setError("");
 
     try {
-      const position = await new Promise<GeolocationCoordinates>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => resolve(pos.coords),
-          (err) => reject(err),
-        )
-      })
+      const position = await new Promise<GeolocationCoordinates>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve(pos.coords),
+            (err) => reject(err)
+          );
+        }
+      );
 
       // Use coordinates to get location name via reverse geocoding
       const response = await fetch("/api/geocode", {
@@ -57,40 +57,34 @@ export default function LandingPage() {
           lat: position.latitude,
           lng: position.longitude,
         }),
-      })
+      });
 
-      const data = await response.json()
-      const locationName = data.address || `${position.latitude},${position.longitude}`
-      const encodedLocation = encodeURIComponent(locationName)
-      router.push(`/results?location=${encodedLocation}`)
+      const data = await response.json();
+      const locationName =
+        data.address || `${position.latitude},${position.longitude}`;
+      const encodedLocation = encodeURIComponent(locationName);
+      router.push(`/results?location=${encodedLocation}`);
     } catch (err) {
-      setError("Unable to access your location. Please enter it manually.")
-      setLoading(false)
+      setError("Unable to access your location. Please enter it manually.");
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/95 flex flex-col">
-      {/* Header with theme toggle */}
-      <header className="border-b border-border/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col relative">
+      {/* Header */}
+      <header className="glass-light border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-center">
           <div className="flex items-center gap-3">
-            <Image 
-              src="/logo-soberpedia.png" 
-              alt="Soberpedia Logo" 
-              width={180} 
-              height={40}
-              className="h-10 w-auto"
+            <Image
+              src="/logo-soberpedia.png"
+              alt="Soberpedia Logo"
+              width={240}
+              height={60}
+              className="h-12 w-auto brightness-0 invert drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]"
               priority
             />
           </div>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
         </div>
       </header>
 
@@ -98,100 +92,132 @@ export default function LandingPage() {
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-2xl space-y-12">
           {/* Hero Section */}
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl sm:text-5xl font-bold text-foreground text-balance">
-              Find Recovery Resources Near You
-            </h2>
-            <p className="text-lg text-muted-foreground text-balance">
-              Discover detox facilities, wellness centers, career support, and fitness resources to support your
-              recovery journey.
+          <div className="text-center space-y-6 animate-fade-in">
+            <div className="inline-block">
+              <h2 className="text-5xl sm:text-6xl font-bold gradient-text text-balance leading-tight mb-2">
+                Find Recovery Resources
+              </h2>
+              <div className="h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent rounded-full"></div>
+            </div>
+            <p className="text-lg text-purple-200/80 text-balance max-w-xl mx-auto">
+              Discover detox facilities, wellness centers, career support, and
+              fitness resources to support your recovery journey.
+            </p>
+            <p className="text-sm text-purple-300/60 text-center">
+              💡 For international locations, include country name (e.g.,
+              "Toronto Canada" or "London UK")
             </p>
           </div>
 
           {/* Search Section */}
-          <div className="space-y-6 bg-card border border-border/40 rounded-2xl p-8 shadow-sm">
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Enter city, ZIP code, or address..."
-                  value={location}
-                  onChange={(e) => {
-                    setLocation(e.target.value)
-                    setError("")
-                  }}
-                  className="pl-10 py-6 text-base"
-                  disabled={loading}
-                />
-              </div>
+          <div className="glass rounded-2xl p-8 shadow-2xl animate-fade-in relative overflow-hidden group">
+            {/* Animated glow effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500"></div>
 
-              {error && (
-                <div className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-lg p-3">
-                  {error}
+            <div className="relative space-y-6">
+              <form onSubmit={handleSearch} className="space-y-4">
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-300 z-10" />
+                  <Input
+                    type="text"
+                    placeholder="Enter city, ZIP code, or address (e.g., 'New York' or '90210')..."
+                    value={location}
+                    onChange={(e) => {
+                      setLocation(e.target.value);
+                      setError("");
+                    }}
+                    className="pl-12 py-6 text-base glass-light border-white/20 text-white placeholder:text-purple-300/60 focus:border-purple-400 transition-all duration-300"
+                    disabled={loading}
+                  />
                 </div>
-              )}
 
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 py-6 text-base bg-[#8731F3] hover:bg-[#7621E3] text-white"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Searching...
-                    </>
-                  ) : (
-                    "Find Resources"
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={handleUseLocation}
-                  disabled={loading}
-                  variant="outline"
-                  className="flex-1 py-6 text-base bg-transparent"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Locating...
-                    </>
-                  ) : (
-                    "Use My Location"
-                  )}
-                </Button>
-              </div>
-            </form>
+                {error && (
+                  <div className="text-sm text-red-300 glass-light border border-red-400/30 rounded-lg p-3 animate-shake">
+                    {error}
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 py-6 text-base bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300 hover:scale-105 border-0"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Searching...
+                      </>
+                    ) : (
+                      "Find Resources"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleUseLocation}
+                    disabled={loading}
+                    variant="outline"
+                    className="flex-1 py-6 text-base glass-light border-white/20 text-purple-200 hover:text-white hover:border-purple-400 transition-all duration-300 hover:scale-105"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Locating...
+                      </>
+                    ) : (
+                      "Use My Location"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
 
           {/* Resource Categories Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CategoryCard title="Detox & Treatment" description="Addiction treatment and rehabilitation facilities" />
-            <CategoryCard title="Health & Wellness" description="Mental health services and wellness centers" />
-            <CategoryCard title="Career Support" description="Job training and workforce development" />
-            <CategoryCard title="Fitness Centers" description="Gyms, yoga studios, and recreation facilities" />
+            <CategoryCard
+              title="Detox & Treatment"
+              description="Addiction treatment and rehabilitation facilities"
+            />
+            <CategoryCard
+              title="Health & Wellness"
+              description="Mental health services and wellness centers"
+            />
+            <CategoryCard
+              title="Career Support"
+              description="Job training and workforce development"
+            />
+            <CategoryCard
+              title="Fitness Centers"
+              description="Gyms, yoga studios, and recreation facilities"
+            />
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 py-6 px-4">
-        <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
+      <footer className="glass-light border-t border-white/10 py-6 px-4">
+        <div className="max-w-7xl mx-auto text-center text-sm text-purple-300/70">
           <p>Support your recovery journey with resources in your community.</p>
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
-function CategoryCard({ title, description }: { title: string; description: string }) {
+function CategoryCard({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   return (
-    <div className="bg-card border border-border/40 rounded-lg p-4 hover:border-border/60 transition-colors">
-      <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground">{description}</p>
+    <div className="glass-light rounded-xl p-5 hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 group cursor-pointer border border-white/10 hover:border-purple-400/50">
+      <h3 className="font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">
+        {title}
+      </h3>
+      <p className="text-sm text-purple-200/60">{description}</p>
     </div>
-  )
+  );
 }

@@ -28,20 +28,20 @@ export default function FilterPanel({
 
   return (
     <div className="space-y-4">
-      <div className="bg-card border border-border/40 rounded-lg p-4">
+      <div className="glass rounded-lg p-4 border border-white/10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-foreground">Filters</h3>
+          <h3 className="font-semibold text-white">Filters</h3>
           {isLoading && (
-            <Loader2 className="w-4 h-4 animate-spin text-primary" />
+            <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
           )}
         </div>
 
         <div className="space-y-4">
           {/* Search Radius */}
           <div>
-            <label className="text-sm font-medium text-foreground mb-3 block">
-              Search Radius: {localRadius} miles
-              {isLoading && <span className="text-xs text-primary ml-2">(updating...)</span>}
+            <label className="text-sm font-medium text-white mb-3 block">
+              Search Radius: <span className="text-purple-400">{localRadius}</span> miles
+              {isLoading && <span className="text-xs text-purple-400 ml-2 animate-pulse">(updating...)</span>}
             </label>
             
             {/* Quick buttons for common radii */}
@@ -54,11 +54,11 @@ export default function FilterPanel({
                     onRadiusChange(miles)
                   }}
                   disabled={isLoading}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ${
                     localRadius === miles
-                      ? 'bg-[#8731F3] text-white'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/50'
+                      : 'glass-light text-purple-300 hover:bg-white/10'
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
                 >
                   {miles}mi
                 </button>
@@ -75,7 +75,7 @@ export default function FilterPanel({
               className="w-full cursor-pointer"
               disabled={isLoading}
             />
-            <div className="flex justify-between text-xs text-muted-foreground mt-2">
+            <div className="flex justify-between text-xs text-purple-300/70 mt-2">
               <span>1 mi</span>
               <span>50 mi</span>
             </div>
@@ -84,9 +84,9 @@ export default function FilterPanel({
       </div>
 
       {/* Info Card */}
-      <div className="bg-[#8731F3]/5 border border-[#8731F3]/20 rounded-lg p-4">
-        <p className="text-sm text-foreground/80">
-          <strong>Tip:</strong> Expand your search radius to find more resources in your area.
+      <div className="glass rounded-lg p-4 border border-purple-400/30 bg-gradient-to-br from-purple-600/10 to-pink-600/10">
+        <p className="text-sm text-purple-200/90">
+          <strong className="text-purple-300">Tip:</strong> Expand your search radius to find more resources in your area.
         </p>
       </div>
     </div>

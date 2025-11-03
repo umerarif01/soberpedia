@@ -121,6 +121,179 @@
   }
   body {
     @apply bg-background text-foreground;
+    position: relative;
+    overflow-x: hidden;
+  }
+  
+  /* Cosmic background */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background: 
+      radial-gradient(ellipse at top, rgba(135, 49, 243, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+      linear-gradient(180deg, #0a0118 0%, #1a0b2e 50%, #2d1b4e 100%);
+  }
+  
+  /* Galaxy stars - multiple layers */
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-image: 
+      /* Large bright stars */
+      radial-gradient(2px 2px at 10% 20%, white, transparent),
+      radial-gradient(2px 2px at 90% 80%, white, transparent),
+      radial-gradient(2px 2px at 30% 70%, rgba(255, 255, 255, 0.9), transparent),
+      radial-gradient(2px 2px at 70% 30%, rgba(255, 255, 255, 0.9), transparent),
+      radial-gradient(3px 3px at 50% 50%, rgba(255, 255, 255, 0.8), transparent),
+      
+      /* Medium purple stars */
+      radial-gradient(2px 2px at 20% 40%, rgba(168, 85, 247, 0.8), transparent),
+      radial-gradient(2px 2px at 80% 60%, rgba(147, 51, 234, 0.8), transparent),
+      radial-gradient(2px 2px at 40% 90%, rgba(168, 85, 247, 0.7), transparent),
+      radial-gradient(2px 2px at 60% 10%, rgba(147, 51, 234, 0.7), transparent),
+      radial-gradient(2px 2px at 25% 55%, rgba(135, 49, 243, 0.7), transparent),
+      radial-gradient(2px 2px at 75% 45%, rgba(168, 85, 247, 0.6), transparent),
+      
+      /* Small white stars - layer 1 */
+      radial-gradient(1px 1px at 15% 15%, rgba(255, 255, 255, 0.6), transparent),
+      radial-gradient(1px 1px at 85% 85%, rgba(255, 255, 255, 0.6), transparent),
+      radial-gradient(1px 1px at 45% 25%, rgba(255, 255, 255, 0.5), transparent),
+      radial-gradient(1px 1px at 55% 75%, rgba(255, 255, 255, 0.5), transparent),
+      radial-gradient(1px 1px at 35% 65%, rgba(255, 255, 255, 0.5), transparent),
+      radial-gradient(1px 1px at 65% 35%, rgba(255, 255, 255, 0.5), transparent),
+      radial-gradient(1px 1px at 25% 85%, rgba(255, 255, 255, 0.4), transparent),
+      radial-gradient(1px 1px at 75% 15%, rgba(255, 255, 255, 0.4), transparent),
+      
+      /* Small white stars - layer 2 */
+      radial-gradient(1px 1px at 12% 32%, rgba(255, 255, 255, 0.5), transparent),
+      radial-gradient(1px 1px at 88% 68%, rgba(255, 255, 255, 0.5), transparent),
+      radial-gradient(1px 1px at 42% 58%, rgba(255, 255, 255, 0.4), transparent),
+      radial-gradient(1px 1px at 58% 42%, rgba(255, 255, 255, 0.4), transparent),
+      radial-gradient(1px 1px at 32% 78%, rgba(255, 255, 255, 0.4), transparent),
+      radial-gradient(1px 1px at 68% 22%, rgba(255, 255, 255, 0.4), transparent),
+      
+      /* Tiny stars - dense layer */
+      radial-gradient(1px 1px at 18% 48%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 82% 52%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 38% 18%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 62% 82%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 48% 38%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 52% 62%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 28% 28%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 72% 72%, rgba(255, 255, 255, 0.3), transparent),
+      
+      /* Pink accent stars */
+      radial-gradient(1px 1px at 22% 62%, rgba(236, 72, 153, 0.6), transparent),
+      radial-gradient(1px 1px at 78% 38%, rgba(236, 72, 153, 0.5), transparent),
+      radial-gradient(1px 1px at 52% 88%, rgba(236, 72, 153, 0.5), transparent),
+      radial-gradient(1px 1px at 48% 12%, rgba(236, 72, 153, 0.4), transparent);
+    
+    background-size: 
+      200% 200%, 200% 200%, 200% 200%, 200% 200%, 250% 250%,
+      180% 180%, 180% 180%, 180% 180%, 180% 180%, 190% 190%, 190% 190%,
+      220% 220%, 220% 220%, 220% 220%, 220% 220%, 210% 210%, 210% 210%, 230% 230%, 230% 230%,
+      240% 240%, 240% 240%, 240% 240%, 240% 240%, 250% 250%, 250% 250%,
+      260% 260%, 260% 260%, 260% 260%, 260% 260%, 270% 270%, 270% 270%, 280% 280%, 280% 280%,
+      220% 220%, 220% 220%, 230% 230%, 230% 230%;
+    
+    background-position: 
+      0% 0%, 100% 100%, 30% 70%, 70% 30%, 50% 50%,
+      20% 40%, 80% 60%, 40% 90%, 60% 10%, 25% 55%, 75% 45%,
+      15% 15%, 85% 85%, 45% 25%, 55% 75%, 35% 65%, 65% 35%, 25% 85%, 75% 15%,
+      12% 32%, 88% 68%, 42% 58%, 58% 42%, 32% 78%, 68% 22%,
+      18% 48%, 82% 52%, 38% 18%, 62% 82%, 48% 38%, 52% 62%, 28% 28%, 72% 72%,
+      22% 62%, 78% 38%, 52% 88%, 48% 12%;
+    
+    animation: twinkle 20s ease-in-out infinite alternate, galaxyFloat 40s linear infinite;
+  }
+  
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+  
+  @keyframes galaxyFloat {
+    0% {
+      transform: translateY(0) rotate(0deg);
+    }
+    100% {
+      transform: translateY(-20px) rotate(360deg);
+    }
+  }
+}
+
+/* Glassmorphism styles */
+.glass {
+  background: rgba(26, 11, 46, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(135, 49, 243, 0.2);
+  box-shadow: 
+    0 8px 32px 0 rgba(135, 49, 243, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #a855f7 0%, #8731f3 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gradient border */
+.gradient-border {
+  position: relative;
+  background: rgba(26, 11, 46, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #a855f7, #8731f3, #ec4899, #a855f7);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: gradient-rotate 3s linear infinite;
+  background-size: 200% 200%;
+}
+
+@keyframes gradient-rotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
