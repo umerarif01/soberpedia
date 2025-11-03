@@ -33,79 +33,55 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Geoapify API key not configured" }, { status: 500 })
     }
 
-    // Step 1: Geocode using Geoapify with smart location detection
-    // For ambiguous inputs (like zip codes), get multiple results and pick the best one
-    const isLikelyZipCode = /^\d{4,6}$/.test(location.trim())
-    const limitResults = isLikelyZipCode ? 3 : 1 // Get multiple results for zip codes
-    
+    // Step 1: Geocode using Geoapify (simple and fast with US bias)
     let geocodeResponse
     try {
       geocodeResponse = await fetch(
-        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&limit=${limitResults}&bias=countrycode:us&apiKey=${GEOAPIFY_API_KEY}`,
-        { signal: AbortSignal.timeout(10000) } // 10 second timeout
+        `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(location)}&limit=1&bias=countrycode:us&apiKey=${GEOAPIFY_API_KEY}`,
+        { signal: AbortSignal.timeout(8000) } // 8 second timeout
       )
     } catch (fetchError) {
       console.error('Geocoding fetch error:', fetchError)
-      return NextResponse.json({ error: "Geocoding request timed out. Please try again." }, { status: 500 })
+      return NextResponse.json({ error: "Location search timed out. Please try a different location." }, { status: 500 })
     }
 
     if (!geocodeResponse.ok) {
       console.error('Geocoding API error:', geocodeResponse.status)
-      return NextResponse.json({ error: "Could not geocode location. Please try again." }, { status: 500 })
+      return NextResponse.json({ error: "Location not found. Please check your input and try again." }, { status: 400 })
     }
 
     const geocodeData = await geocodeResponse.json()
-    console.log('Geocode results:', JSON.stringify(geocodeData.features?.slice(0, 3).map((f: any) => ({
-      name: f.properties.formatted,
-      country: f.properties.country_code
-    }))))
 
     if (!geocodeData.features || geocodeData.features.length === 0) {
-      return NextResponse.json({ error: "Could not find that location. Please try again." }, { status: 400 })
-    }
-    
-    // For zip codes, prioritize US locations
-    let selectedFeature = geocodeData.features[0]
-    
-    if (isLikelyZipCode && geocodeData.features.length > 1) {
-      // First check if there's a US match
-      const usMatch = geocodeData.features.find((f: any) => 
-        f.properties.country_code?.toLowerCase() === 'us' || 
-        f.properties.country?.toLowerCase() === 'united states'
-      )
-      if (usMatch) {
-        selectedFeature = usMatch
-        console.log('Selected US match:', selectedFeature.properties.formatted)
-      }
+      return NextResponse.json({ error: "Location not found. Please try a different search." }, { status: 400 })
     }
 
-    const [lng, lat] = selectedFeature.geometry.coordinates
-    const locationName = selectedFeature.properties.formatted
-    
-    console.log(`Selected location: ${locationName} (${lat}, ${lng})`)
+    const [lng, lat] = geocodeData.features[0].geometry.coordinates
+    const locationName = geocodeData.features[0].properties.formatted
 
     // Convert miles to meters for Geoapify
     const radiusMeters = Math.round(radius * 1609.34)
 
-    // Step 2: Search using Geoapify Places API
+    // Step 2: Search using Geoapify Places API (optimized for speed)
     const searchTypes = getSearchTypes(category)
     const allResources: ResourceResult[] = []
     const seenPlaces = new Set<string>()
 
-    // Run searches in parallel (Geoapify handles this well)
-    await Promise.all(
-      searchTypes.map(async (searchType) => {
-        try {
-          const categories = getGeoapifyCategories(searchType)
+    // Run searches in parallel with timeout protection
+    const searchPromises = searchTypes.map(async (searchType) => {
+      try {
+        const categories = getGeoapifyCategories(searchType)
+        
+        for (const categoryFilter of categories) {
+          const placesUrl = `https://api.geoapify.com/v2/places?categories=${categoryFilter}&filter=circle:${lng},${lat},${radiusMeters}&limit=20&apiKey=${GEOAPIFY_API_KEY}`
           
-          for (const categoryFilter of categories) {
-            const placesUrl = `https://api.geoapify.com/v2/places?categories=${categoryFilter}&filter=circle:${lng},${lat},${radiusMeters}&limit=50&apiKey=${GEOAPIFY_API_KEY}`
-            
-            const response = await fetch(placesUrl)
+          try {
+            const response = await fetch(placesUrl, {
+              signal: AbortSignal.timeout(5000) // 5 second timeout per category
+            })
             
             if (!response.ok) {
-              const errorText = await response.text()
-              console.error(`Geoapify search error for ${searchType} (${categoryFilter}): ${response.status}`, errorText)
+              console.error(`Geoapify search error for ${searchType} (${categoryFilter}): ${response.status}`)
               continue
             }
 
@@ -135,12 +111,18 @@ export async function POST(request: NextRequest) {
                 distance,
               })
             }
+          } catch (fetchErr) {
+            console.error(`Timeout searching ${categoryFilter}:`, fetchErr)
+            // Continue to next category even if this one times out
           }
-        } catch (err) {
-          console.error(`Error searching for ${searchType}:`, err)
         }
-      })
-    )
+      } catch (err) {
+        console.error(`Error searching for ${searchType}:`, err)
+      }
+    })
+
+    // Wait for all searches to complete or timeout
+    await Promise.all(searchPromises)
 
     // Sort by distance
     allResources.sort((a, b) => (a.distance || 0) - (b.distance || 0))
