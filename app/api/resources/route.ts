@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         const categories = getGeoapifyCategories(searchType)
         
         for (const categoryFilter of categories) {
-          const placesUrl = `https://api.geoapify.com/v2/places?categories=${categoryFilter}&filter=circle:${lng},${lat},${radiusMeters}&limit=20&apiKey=${GEOAPIFY_API_KEY}`
+          const placesUrl = `https://api.geoapify.com/v2/places?categories=${categoryFilter}&filter=circle:${lng},${lat},${radiusMeters}&limit=30&apiKey=${GEOAPIFY_API_KEY}`
           
           try {
             const response = await fetch(placesUrl, {
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     allResources.sort((a, b) => (a.distance || 0) - (b.distance || 0))
 
     return NextResponse.json({
-      resources: allResources.slice(0, 50),
+      resources: allResources.slice(0, 100), // Increased from 50 to 100 results
       location: locationName,
       centerCoords: { lat, lng },
     })
@@ -140,12 +140,39 @@ export async function POST(request: NextRequest) {
 
 function getGeoapifyCategories(searchType: string): string[] {
   // Geoapify category codes: https://apidocs.geoapify.com/docs/places/#categories
-  // Using only validated, working categories from the API documentation
+  // Expanded categories for more comprehensive results
   const categories: Record<string, string[]> = {
-    detox: ["healthcare.hospital", "healthcare.clinic_or_praxis"],
-    wellness: ["healthcare.pharmacy", "leisure.spa", "service.beauty.spa"],
-    fitness: ["sport.fitness", "sport.sports_centre", "sport.swimming_pool"],
-    career: ["education.school", "education.college", "education.university"],
+    detox: [
+      "healthcare.hospital",
+      "healthcare.clinic_or_praxis",
+      "healthcare.doctor",
+      "healthcare",
+    ],
+    wellness: [
+      "healthcare.pharmacy",
+      "healthcare.clinic_or_praxis",
+      "healthcare.alternative",
+      "healthcare.counseling",
+      "leisure.spa",
+      "service.beauty.spa",
+      "leisure.park",
+    ],
+    fitness: [
+      "sport.fitness",
+      "sport.sports_centre",
+      "sport.swimming_pool",
+      "sport.stadium",
+      "leisure.sports_club",
+      "leisure.park",
+    ],
+    career: [
+      "education.school",
+      "education.college",
+      "education.university",
+      "office.employment_agency",
+      "office.government",
+      "commercial.library",
+    ],
   }
 
   return categories[searchType] || categories.wellness
