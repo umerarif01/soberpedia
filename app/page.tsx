@@ -14,6 +14,7 @@ export default function LandingPage() {
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +27,10 @@ export default function LandingPage() {
     setError("");
 
     try {
-      // Encode location and redirect to results page
+      // Encode location and redirect to results page with selected category
       const encodedLocation = encodeURIComponent(location);
-      router.push(`/results?location=${encodedLocation}`);
+      const categoryParam = selectedCategory !== "all" ? `&category=${selectedCategory}` : "";
+      router.push(`/results?location=${encodedLocation}${categoryParam}`);
     } catch (err) {
       setError("An error occurred. Please try again.");
       setLoading(false);
@@ -63,7 +65,8 @@ export default function LandingPage() {
       const locationName =
         data.address || `${position.latitude},${position.longitude}`;
       const encodedLocation = encodeURIComponent(locationName);
-      router.push(`/results?location=${encodedLocation}`);
+      const categoryParam = selectedCategory !== "all" ? `&category=${selectedCategory}` : "";
+      router.push(`/results?location=${encodedLocation}${categoryParam}`);
     } catch (err) {
       setError("Unable to access your location. Please enter it manually.");
       setLoading(false);
@@ -99,10 +102,11 @@ export default function LandingPage() {
               </h2>
               <div className="h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent rounded-full"></div>
             </div>
-            <p className="text-lg text-purple-200/80 text-balance max-w-xl mx-auto">
-              Discover detox facilities, wellness centers, career support, and
-              fitness resources to support your recovery journey.
-            </p>
+                  <p className="text-lg text-purple-200/80 text-balance max-w-xl mx-auto">
+                    Discover treatment facilities, wellness centers, fitness resources,
+                    nutrition options, recreation, spiritual support, and community services
+                    to support your recovery journey.
+                  </p>
             <p className="text-sm text-purple-300/60 text-center">
               💡 For international locations, include country name (e.g.,
               "Toronto Canada" or "London UK")
@@ -114,22 +118,42 @@ export default function LandingPage() {
             {/* Animated glow effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-500"></div>
 
-            <div className="relative space-y-6">
-              <form onSubmit={handleSearch} className="space-y-4">
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-300 z-10" />
-                  <Input
-                    type="text"
-                    placeholder="Enter city, ZIP code, or address (e.g., 'New York' or '90210')..."
-                    value={location}
-                    onChange={(e) => {
-                      setLocation(e.target.value);
-                      setError("");
-                    }}
-                    className="pl-12 py-6 text-base glass-light border-white/20 text-white placeholder:text-purple-300/60 focus:border-purple-400 transition-all duration-300"
-                    disabled={loading}
-                  />
-                </div>
+                <div className="relative space-y-6">
+                  <form onSubmit={handleSearch} className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-300 z-10" />
+                        <Input
+                          type="text"
+                          placeholder="Enter city, ZIP code, or address (e.g., 'New York' or '90210')..."
+                          value={location}
+                          onChange={(e) => {
+                            setLocation(e.target.value);
+                            setError("");
+                          }}
+                          className="pl-12 py-6 text-base glass-light border-white/20 text-white placeholder:text-purple-300/60 focus:border-purple-400 transition-all duration-300"
+                          disabled={loading}
+                        />
+                      </div>
+                      {selectedCategory !== "all" && (
+                        <div className="flex items-center gap-2 text-sm text-purple-300 animate-fade-in">
+                          <span className="text-purple-400">🎯</span>
+                          <span>
+                            Searching for:{" "}
+                            <span className="font-semibold text-purple-200">
+                              {selectedCategory === "detox" && "Detox & Treatment"}
+                              {selectedCategory === "wellness" && "Health & Wellness"}
+                              {selectedCategory === "fitness" && "Fitness Centers"}
+                              {selectedCategory === "career" && "Career Support"}
+                              {selectedCategory === "nutrition" && "Food & Nutrition"}
+                              {selectedCategory === "recreation" && "Recreation"}
+                              {selectedCategory === "spiritual" && "Spiritual Support"}
+                              {selectedCategory === "community" && "Community Services"}
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
                 {error && (
                   <div className="text-sm text-red-300 glass-light border border-red-400/30 rounded-lg p-3 animate-shake">
@@ -174,23 +198,75 @@ export default function LandingPage() {
           </div>
 
           {/* Resource Categories Overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CategoryCard
-              title="Detox & Treatment"
-              description="Addiction treatment and rehabilitation facilities"
-            />
-            <CategoryCard
-              title="Health & Wellness"
-              description="Mental health services and wellness centers"
-            />
-            <CategoryCard
-              title="Career Support"
-              description="Job training and workforce development"
-            />
-            <CategoryCard
-              title="Fitness Centers"
-              description="Gyms, yoga studios, and recreation facilities"
-            />
+          <div className="space-y-3">
+            <p className="text-sm text-purple-300/80 text-center">
+              Select a category (optional):
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <CategoryCard
+                title="All Categories"
+                description="Search all types of resources"
+                categoryId="all"
+                isSelected={selectedCategory === "all"}
+                onClick={() => setSelectedCategory("all")}
+              />
+              <CategoryCard
+                title="Detox & Treatment"
+                description="Addiction treatment and rehabilitation"
+                categoryId="detox"
+                isSelected={selectedCategory === "detox"}
+                onClick={() => setSelectedCategory("detox")}
+              />
+              <CategoryCard
+                title="Health & Wellness"
+                description="Mental health and wellness services"
+                categoryId="wellness"
+                isSelected={selectedCategory === "wellness"}
+                onClick={() => setSelectedCategory("wellness")}
+              />
+              <CategoryCard
+                title="Fitness Centers"
+                description="Gyms, yoga studios, and sports"
+                categoryId="fitness"
+                isSelected={selectedCategory === "fitness"}
+                onClick={() => setSelectedCategory("fitness")}
+              />
+              <CategoryCard
+                title="Career Support"
+                description="Job training and employment services"
+                categoryId="career"
+                isSelected={selectedCategory === "career"}
+                onClick={() => setSelectedCategory("career")}
+              />
+              <CategoryCard
+                title="Food & Nutrition"
+                description="Restaurants, cafes, and markets"
+                categoryId="nutrition"
+                isSelected={selectedCategory === "nutrition"}
+                onClick={() => setSelectedCategory("nutrition")}
+              />
+              <CategoryCard
+                title="Recreation"
+                description="Parks, museums, and entertainment"
+                categoryId="recreation"
+                isSelected={selectedCategory === "recreation"}
+                onClick={() => setSelectedCategory("recreation")}
+              />
+              <CategoryCard
+                title="Spiritual Support"
+                description="Places of worship and meditation"
+                categoryId="spiritual"
+                isSelected={selectedCategory === "spiritual"}
+                onClick={() => setSelectedCategory("spiritual")}
+              />
+              <CategoryCard
+                title="Community Services"
+                description="Libraries, social services, and support"
+                categoryId="community"
+                isSelected={selectedCategory === "community"}
+                onClick={() => setSelectedCategory("community")}
+              />
+            </div>
           </div>
         </div>
       </main>
@@ -208,16 +284,40 @@ export default function LandingPage() {
 function CategoryCard({
   title,
   description,
+  categoryId,
+  isSelected,
+  onClick,
 }: {
   title: string;
   description: string;
+  categoryId: string;
+  isSelected: boolean;
+  onClick: () => void;
 }) {
   return (
-    <div className="glass-light rounded-xl p-5 hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 group cursor-pointer border border-white/10 hover:border-purple-400/50">
-      <h3 className="font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">
-        {title}
-      </h3>
-      <p className="text-sm text-purple-200/60">{description}</p>
-    </div>
+    <button
+      onClick={onClick}
+      className={`text-left rounded-xl p-5 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/20 group cursor-pointer border ${
+        isSelected
+          ? "bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-purple-400 shadow-lg shadow-purple-500/30"
+          : "glass-light border-white/10 hover:bg-white/10 hover:border-purple-400/50"
+      }`}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <h3
+          className={`font-semibold transition-colors ${
+            isSelected ? "text-purple-300" : "text-white group-hover:text-purple-300"
+          }`}
+        >
+          {title}
+        </h3>
+        {isSelected && (
+          <span className="text-purple-400 text-lg">✓</span>
+        )}
+      </div>
+      <p className={`text-sm ${isSelected ? "text-purple-200/80" : "text-purple-200/60"}`}>
+        {description}
+      </p>
+    </button>
   );
 }

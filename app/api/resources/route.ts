@@ -173,6 +173,34 @@ function getGeoapifyCategories(searchType: string): string[] {
       "office.government",
       "commercial.library",
     ],
+    nutrition: [
+      "catering.restaurant",
+      "catering.cafe",
+      "commercial.supermarket",
+      "commercial.marketplace",
+      "catering.fast_food",
+    ],
+    recreation: [
+      "leisure.park",
+      "entertainment.culture",
+      "entertainment.museum",
+      "entertainment.cinema",
+      "entertainment.zoo",
+      "leisure.playground",
+      "tourism.attraction",
+    ],
+    spiritual: [
+      "building.place_of_worship",
+      "religion.place_of_worship",
+      "leisure.park",
+    ],
+    community: [
+      "office.government",
+      "commercial.library",
+      "service.social_facility",
+      "office.ngo",
+      "leisure.community_centre",
+    ],
   }
 
   return categories[searchType] || categories.wellness
@@ -182,11 +210,15 @@ function getCategoryLabel(searchType: string): string {
   const labels: Record<string, string> = {
     detox: "Health & Wellness",
     wellness: "Wellness Center",
-    fitness: "Fitness",
+    fitness: "Fitness Center",
     career: "Career Support",
+    nutrition: "Food & Nutrition",
+    recreation: "Recreation",
+    spiritual: "Spiritual Center",
+    community: "Community Services",
   }
 
-  return labels[searchType] || "Wellness Center"
+  return labels[searchType] || "Resource"
 }
 
 function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -202,7 +234,7 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 
 function getSearchTypes(category?: string): string[] {
   if (!category || category === "all") {
-    return ["detox", "wellness", "fitness", "career"]
+    return ["detox", "wellness", "fitness", "career", "nutrition", "recreation", "spiritual", "community"]
   }
   return [category]
 }
